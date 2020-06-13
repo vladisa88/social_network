@@ -5,7 +5,7 @@ if (window.myBookmarklet !== undefined){
 else {
     document.body.appendChild(
     document.createElement('script')
-).src='https://f1ec4e292562.ngrok.io/static/js/bookmarklet.js?r=' +
+).src='https://e61582616710.ngrok.io/static/js/bookmarklet.js?r=' +
     Math.floor(Math.random()*99999999999999999999);
 
 }

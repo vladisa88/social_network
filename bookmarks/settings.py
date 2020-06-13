@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+from django.urls import reverse_lazy
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,7 +26,7 @@ SECRET_KEY = '_rh@!4uz$_f5151)q%kx_&c&9wx-o*(s2=oqx(e+e6v+9csmd2'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'f1ec4e292562.ngrok.io']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'e61582616710.ngrok.io']
 
 
 # Application definition
@@ -40,6 +41,7 @@ INSTALLED_APPS = [
     # local
     'accounts',
     'images',
+    'actions',
 
     'sorl.thumbnail',
 
@@ -141,3 +143,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 THUMBNAIL_DEBUG = True
+
+ABSOLUTE_URL_OVERRIDES = {
+    'auth.user': lambda u: reverse_lazy('user_detail', args=[u.username])
+}
