@@ -10,7 +10,9 @@ from django.contrib.auth.models import User
 
 from .forms import LoginForm, UserRegistrationForm, UserEditForm, ProfileEditForm
 from .models import Profile, Contact
+from actions.models import Action
 from common.decorators import ajax_required
+from actions.utils import create_action
 
 
 def user_login(request):
@@ -64,6 +66,7 @@ class RegisterView(generic.View):
             new_user.set_password(user_form.cleaned_data['password'])
             new_user.save()
             Profile.objects.create(user=new_user)
+            create_action(new_user, 'has created an account')
             return render(request, 'account/register_done.html',
                           {'new_user': new_user})
 
@@ -137,6 +140,7 @@ def user_follow(request):
             if action == 'follow':
                 Contact.objects.get_or_create(user_from=request.user,
                                               user_to=user)
+                create_action(request.user, 'is following', user)
             else:
                 Contact.objects.filter(user_from=request.user,
                                        user_to=user).delete()
@@ -144,3 +148,19 @@ def user_follow(request):
         except User.DoesNotExist:
             return JsonResponse({'status': 'ok'})
     return JsonResponse({'status': 'ok'})
+
+
+@login_required
+def dashboard(request):
+    # all actions by default
+    actions = Action.objects.exclude(user=request.user)
+    following_ids = request.user.following.values_list('id', flat=True)
+    if following_ids:
+        # if current user follow someone
+        # show only their actions
+        actions = actions.filter(user_id__in=following_ids)
+    actions = actions.select_related('user', 'user__profile')\
+        .prefetch_related('target')[:10]
+
+    return render(request, 'account/dashboard.html',
+                  {'section': 'dashboard', 'actions': actions})
